@@ -103,35 +103,35 @@ export const extractMedicineInfo = async (request: ExtractMedicineRequest): Prom
   return response.json()
 }
 
-// export const extractSessionMedicines = async (request: SessionExtractRequest): Promise<SessionExtractResponse> => {
-//   const response = await fetch(`${API_BASE_URL}/session/extract`, {
-//   method: 'POST',
-//   headers: { 'Content-Type': 'application/json' },
-//   body: JSON.stringify(request),
-// })
+export const extractSessionMedicines = async (request: SessionExtractRequest): Promise<SessionExtractResponse> => {
+  const response = await fetch(`${API_BASE_URL}/session/extract`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(request),
+})
 
-//   if (!response.ok) {
-//     throw new Error(`Session extract API request failed: ${response.status} ${response.statusText}`)
-//   }
+  if (!response.ok) {
+    throw new Error(`Session extract API request failed: ${response.status} ${response.statusText}`)
+  }
 
-//   return response.json()
-// }
+  return response.json()
+}
 
-// export const fetchMedicineImage = async (filename: string = 'test'): Promise<string> => {
-//   const response = await fetch(`${API_BASE_URL}/image/${filename}`, {
-//   method: 'GET',
-// })
+export const fetchMedicineImage = async (filename: string = 'test'): Promise<string> => {
+  const response = await fetch(`${API_BASE_URL}/image/${filename}`, {
+  method: 'GET',
+})
 
-//   if (!response.ok) {
-//     throw new Error(`Image fetch failed: ${response.status} ${response.statusText}`)
-//   }
+  if (!response.ok) {
+    throw new Error(`Image fetch failed: ${response.status} ${response.statusText}`)
+  }
 
-//   // Convert the response to a blob and then to a data URL for display
-//   const blob = await response.blob()
-//   return new Promise((resolve, reject) => {
-//     const reader = new FileReader()
-//     reader.onloadend = () => resolve(reader.result as string)
-//     reader.onerror = reject
-//     reader.readAsDataURL(blob)
-//   })
-// }
+  // Convert the response to a blob and then to a data URL for display
+  const blob = await response.blob()
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
