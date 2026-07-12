@@ -30,64 +30,41 @@ export function useMedicineData(selectedLanguages: Language[]): UseMedicineDataR
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Call API to extract medicine information
   useEffect(() => {
-    const fetchMedicineData = async () => {
-      setLoading(true)
-      setError(null)
-
-      try {
-        // Call the session extract API with hardcoded values
-        const sessionResponse = await extractSessionMedicines({
-          session_id: 'session_001',
-          languages: ['zh-CN', 'id']
-        })
-
-        // Process each medicine and add image URLs
-        const processedMedicines: MedicineTranslation[] = await Promise.all(
-          sessionResponse.medicines.map(async (medicine: Medicine) => {
-            try {
-              // Try to fetch the image for each medicine
-              const imageUrl = await fetchMedicineImage(medicine.filename.replace(/\.[^/.]+$/, '')) // Remove extension
-              return {
-                filename: medicine.filename,
-                medicine_name: medicine.medicine_info.medicine_name,
-                dosage: medicine.medicine_info.dosage,
-                primary_language: medicine.medicine_info.primary_language,
-                translations: medicine.medicine_info.translations,
-                instructions: medicine.medicine_info.instructions,
-                imageUrl
-              }
-            } catch (imageError) {
-              console.warn(`Failed to load image for ${medicine.filename}:`, imageError)
-              // Return medicine data without image
-              return {
-                filename: medicine.filename,
-                medicine_name: medicine.medicine_info.medicine_name,
-                dosage: medicine.medicine_info.dosage,
-                primary_language: medicine.medicine_info.primary_language,
-                translations: medicine.medicine_info.translations,
-                instructions: medicine.medicine_info.instructions
-              }
-            }
-          })
-        )
-
-        setMedicines(processedMedicines)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to extract medicine information')
-        console.error('Error extracting medicine info:', err)
-      } finally {
+    try {
+      const raw = sessionStorage.getItem('medicineResults')
+      if (!raw) {
+        setError('No medicine data found. Please go back and upload photos.')
         setLoading(false)
+        return
       }
+
+      const results = JSON.parse(raw) as Array<{
+        filename: string
+        original_text: string
+        translations: Record<string, string>
+      }>
+
+      const processed: MedicineTranslation[] = results.map((result) => ({
+        filename: result.filename,
+        medicine_name: result.original_text,
+        dosage: '',
+        primary_language: 'English',
+        translations: Object.entries(result.translations).map(([lang, text]) => ({
+          language: lang,
+          medicine_name_translation: text,
+          dosage_translation: ''
+        })),
+        instructions: []
+      }))
+
+      setMedicines(processed)
+    } catch (err) {
+      setError('Failed to load medicine data.')
+    } finally {
+      setLoading(false)
     }
+  }, [])
 
-    fetchMedicineData()
-  }, []) // Remove dependency on selectedLanguages since we're using hardcoded languages
-
-  return {
-    medicines,
-    loading,
-    error
-  }
+  return { medicines, loading, error }
 }

@@ -189,10 +189,35 @@ export default function PhotoCapturePage() {
     setUploadedPhotos(prev => prev.filter(photo => photo.id !== photoId))
   }
 
-  const handleProcessPhotos = () => {
-    // Navigate to review translations page with selected languages and session_id
-    const languageParam = selectedLanguages.map(lang => lang.code).join(',')
-    router.push(`/review-translations?languages=${languageParam}&session_id=session_001`)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const handleProcessPhotos = async () => {
+    if (uploadedPhotos.length === 0) return
+    setIsProcessing(true)
+
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+    const languageNames = selectedLanguages.map(lang => lang.name)
+
+    try {
+      const results = await Promise.all(
+        uploadedPhotos.map(async (photo) => {
+          const formData = new FormData()
+          formData.append('image', photo.file)
+          formData.append('languages', JSON.stringify(languageNames))
+          const res = await fetch(`${API_BASE_URL}/upload`, { method: 'POST', body: formData })
+          if (!res.ok) throw new Error(`Upload failed for ${photo.name}`)
+          const data = await res.json()
+          return { filename: photo.name, ...data }
+        })
+      )
+      sessionStorage.setItem('medicineResults', JSON.stringify(results))
+      const languageParam = selectedLanguages.map(lang => lang.code).join(',')
+      router.push(`/review-translations?languages=${languageParam}`)
+    } catch (err) {
+      console.error('Processing error:', err)
+      alert('Failed to process photos. Please try again.')
+      setIsProcessing(false)
+    }
   }
 
   // Drag and drop handlers
@@ -390,9 +415,10 @@ export default function PhotoCapturePage() {
                 </div>
                 <button
                   onClick={handleProcessPhotos}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center space-x-2"
+                  disabled={isProcessing}
+                  className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center space-x-2"
                 >
-                  <span>Process {uploadedPhotos.length} Photo{uploadedPhotos.length !== 1 ? 's' : ''}</span>
+                  <span>{isProcessing ? 'Processing...' : `Process ${uploadedPhotos.length} Photo${uploadedPhotos.length !== 1 ? 's' : ''}`}</span>
                   <svg 
                     width="20" 
                     height="20" 
