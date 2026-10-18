@@ -1,12 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Language } from '@/constants/languages'
-import { extractSessionMedicines, fetchMedicineImage, Medicine, Translation } from '@/lib/api'
 
 export interface Instruction {
   language: string
   text: string
+}
+
+export interface Translation {
+  language: string
+  medicine_name_translation: string
+  dosage_translation: string
 }
 
 export interface MedicineTranslation {
@@ -16,7 +20,6 @@ export interface MedicineTranslation {
   primary_language: string
   translations: Translation[]
   instructions: Instruction[]
-  imageUrl?: string
 }
 
 export interface UseMedicineDataReturn {
@@ -25,7 +28,7 @@ export interface UseMedicineDataReturn {
   error: string | null
 }
 
-export function useMedicineData(selectedLanguages: Language[]): UseMedicineDataReturn {
+export function useMedicineData(): UseMedicineDataReturn {
   const [medicines, setMedicines] = useState<MedicineTranslation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -59,7 +62,7 @@ export function useMedicineData(selectedLanguages: Language[]): UseMedicineDataR
       }))
 
       setMedicines(processed)
-    } catch (err) {
+    } catch {
       setError('Failed to load medicine data.')
     } finally {
       setLoading(false)

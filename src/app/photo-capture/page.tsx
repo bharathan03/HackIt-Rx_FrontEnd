@@ -2,29 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Language, LANGUAGES } from '@/constants/languages'
-
-// Back Arrow Icon
-const BackIcon = () => (
-  <svg 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg"
-    className="text-gray-700"
-  >
-    <path 
-      d="M15 18L9 12L15 6" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-  </svg>
-)
-
-
+import { Language, parseLanguageParam } from '@/constants/languages'
+import { BackIcon } from '@/components/BackIcon'
 
 // Upload Icon
 const UploadIcon = () => (
@@ -124,17 +103,7 @@ export default function PhotoCapturePage() {
 
   // Get selected languages from URL params
   useEffect(() => {
-    const languageParam = searchParams.get('languages')
-    if (languageParam) {
-      const languageCodes = languageParam.split(',')
-      const languages = languageCodes.map(code => 
-        LANGUAGES.find(lang => lang.code === code.trim())
-      ).filter(Boolean) as Language[]
-      setSelectedLanguages(languages)
-    } else {
-      // Fallback to English if no languages specified
-      setSelectedLanguages([LANGUAGES[0]])
-    }
+    setSelectedLanguages(parseLanguageParam(searchParams.get('languages')))
   }, [searchParams])
 
   const handleBack = () => {

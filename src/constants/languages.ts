@@ -18,3 +18,13 @@ export const LANGUAGES: Language[] = [
   { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' }
 ]
+
+// Parse the comma-separated `languages` URL param into Language objects.
+// Falls back to English when the param is missing.
+export function parseLanguageParam(param: string | null): Language[] {
+  if (!param) return [LANGUAGES[0]]
+  return param
+    .split(',')
+    .map(code => LANGUAGES.find(lang => lang.code === code.trim()))
+    .filter(Boolean) as Language[]
+}

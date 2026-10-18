@@ -2,28 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Language, LANGUAGES } from '@/constants/languages'
+import { Language, LANGUAGES, parseLanguageParam } from '@/constants/languages'
+import { BackIcon } from '@/components/BackIcon'
 import { useMedicineData } from './data'
-
-// Back Arrow Icon
-const BackIcon = () => (
-  <svg 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg"
-    className="text-gray-700"
-  >
-    <path 
-      d="M15 18L9 12L15 6" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-  </svg>
-)
 
 // Edit Icon
 const EditIcon = () => (
@@ -75,21 +56,11 @@ export default function ReviewTranslationsPage() {
   const [selectedLanguages, setSelectedLanguages] = useState<Language[]>([])
   
   // Use the custom hook for medicine data
-  const { medicines, loading, error } = useMedicineData(selectedLanguages)
+  const { medicines, loading, error } = useMedicineData()
 
   // Get selected languages from URL params
   useEffect(() => {
-    const languageParam = searchParams.get('languages')
-    if (languageParam) {
-      const languageCodes = languageParam.split(',')
-      const languages = languageCodes.map(code => 
-        LANGUAGES.find(lang => lang.code === code.trim())
-      ).filter(Boolean) as Language[]
-      setSelectedLanguages(languages)
-    } else {
-      // Fallback to English if no languages specified
-      setSelectedLanguages([LANGUAGES[0]])
-    }
+    setSelectedLanguages(parseLanguageParam(searchParams.get('languages')))
   }, [searchParams])
 
   const handleBack = () => {
@@ -177,27 +148,12 @@ export default function ReviewTranslationsPage() {
                     {/* Medicine Image - Left Column */}
                     <div className="lg:col-span-1">
                       <div className="w-full h-48 bg-gradient-to-br from-blue-900 to-gray-700 rounded-lg overflow-hidden">
-                        {medicine.imageUrl ? (
-                          <img
-                            src={medicine.imageUrl}
-                            alt={`Medicine: ${medicine.medicine_name}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              console.error('Image failed to load:', medicine.imageUrl);
-                              e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23374151'/%3E%3Ctext x='200' y='100' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='16'%3EImage Load Error%3C/text%3E%3C/svg%3E";
-                            }}
-                            onLoad={() => {
-                              console.log('Medicine image loaded successfully:', medicine.medicine_name);
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <div className="text-center text-white">
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2"></div>
-                              <p className="text-xs">Loading...</p>
-                            </div>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-center text-white">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2"></div>
+                            <p className="text-xs">Loading...</p>
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
 
