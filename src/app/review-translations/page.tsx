@@ -148,12 +148,17 @@ export default function ReviewTranslationsPage() {
                     {/* Medicine Image - Left Column */}
                     <div className="lg:col-span-1">
                       <div className="w-full h-48 bg-gradient-to-br from-blue-900 to-gray-700 rounded-lg overflow-hidden">
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="text-center text-white">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2"></div>
-                            <p className="text-xs">Loading...</p>
+                        {medicine.imageUrl ? (
+                          <img
+                            src={medicine.imageUrl}
+                            alt={`Photo of ${medicine.filename}`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <p className="text-xs text-white">No preview available</p>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
 

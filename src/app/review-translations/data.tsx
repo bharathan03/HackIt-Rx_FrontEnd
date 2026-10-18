@@ -20,6 +20,7 @@ export interface MedicineTranslation {
   primary_language: string
   translations: Translation[]
   instructions: Instruction[]
+  imageUrl?: string
 }
 
 export interface UseMedicineDataReturn {
@@ -44,6 +45,7 @@ export function useMedicineData(): UseMedicineDataReturn {
 
       const results = JSON.parse(raw) as Array<{
         filename: string
+        thumbnail?: string
         original_text: string
         translations: Record<string, string>
       }>
@@ -58,7 +60,8 @@ export function useMedicineData(): UseMedicineDataReturn {
           medicine_name_translation: text,
           dosage_translation: ''
         })),
-        instructions: []
+        instructions: [],
+        imageUrl: result.thumbnail || undefined
       }))
 
       setMedicines(processed)

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Language, parseLanguageParam } from '@/constants/languages'
 import { BackIcon } from '@/components/BackIcon'
+import { createThumbnail } from '@/lib/image'
 
 // Upload Icon
 const UploadIcon = () => (
@@ -173,10 +174,13 @@ export default function PhotoCapturePage() {
           const formData = new FormData()
           formData.append('image', photo.file)
           formData.append('languages', JSON.stringify(languageNames))
-          const res = await fetch(`${API_BASE_URL}/upload`, { method: 'POST', body: formData })
+          const [res, thumbnail] = await Promise.all([
+            fetch(`${API_BASE_URL}/upload`, { method: 'POST', body: formData }),
+            createThumbnail(photo.file),
+          ])
           if (!res.ok) throw new Error(`Upload failed for ${photo.name}`)
           const data = await res.json()
-          return { filename: photo.name, ...data }
+          return { filename: photo.name, thumbnail, ...data }
         })
       )
       sessionStorage.setItem('medicineResults', JSON.stringify(results))
